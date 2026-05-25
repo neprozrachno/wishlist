@@ -1,0 +1,16 @@
+{% extends 'core/base.html' %}
+{% block title %}Удалить подарок — WishList{% endblock %}
+{% block content %}
+<div class="delete-card">
+    <div class="delete-header"><i class="ti ti-alert-triangle"></i> Удаление подарка</div>
+    <div class="delete-body">
+        <p>Вы уверены, что хотите удалить подарок <b>«{{ gift.name }}»</b>?</p>
+        <p class="delete-warning">Это действие нельзя отменить.</p>
+        <form method="post" class="form-footer">
+            {% csrf_token %}
+            <button type="submit" class="btn-danger-main">Да, удалить</button>
+            <a href="{% url 'wishlist_detail' gift.wishlist.pk %}" class="btn-outline-sm">Отмена</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

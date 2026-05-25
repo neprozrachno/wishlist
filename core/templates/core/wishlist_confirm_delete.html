@@ -1,0 +1,16 @@
+{% extends 'core/base.html' %}
+{% block title %}Удалить вишлист — WishList{% endblock %}
+{% block content %}
+<div class="delete-card">
+    <div class="delete-header"><i class="ti ti-alert-triangle"></i> Удаление вишлиста</div>
+    <div class="delete-body">
+        <p>Вы уверены, что хотите удалить вишлист <b>«{{ wishlist.title }}»</b>?</p>
+        <p class="delete-warning">Вместе с ним будут удалены все подарки. Это действие нельзя отменить.</p>
+        <form method="post" class="form-footer">
+            {% csrf_token %}
+            <button type="submit" class="btn-danger-main">Да, удалить</button>
+            <a href="{% url 'wishlist_detail' wishlist.pk %}" class="btn-outline-sm">Отмена</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}WishList{% endblock %}</title>
+    <link rel="stylesheet" href="{% load static %}{% static 'css/style.css' %}">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+</head>
+<body>
+
+{% if user.is_authenticated %}
+<div class="app-layout">
+    <!-- Сайдбар -->
+    <aside class="sidebar">
+        <div class="brand">wish<span>list</span></div>
+
+        <div class="user-chip">
+            <div class="ava">{{ user.username|first|upper }}</div>
+            <div>
+                <div class="user-name">{{ user.username }}</div>
+                <div class="user-handle">@{{ user.username }}</div>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="{% url 'profile' %}" class="nav-item {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
+                <i class="ti ti-user"></i> Моя страница
+            </a>
+            <a href="{% url 'public_feed' %}" class="nav-item {% if request.resolver_match.url_name == 'public_feed' %}active{% endif %}">
+                <i class="ti ti-compass"></i> Идеи подарков
+            </a>
+            <a href="{% url 'wishlist_create' %}" class="nav-item {% if request.resolver_match.url_name == 'wishlist_create' %}active{% endif %}">
+                <i class="ti ti-gift"></i> Мои вишлисты
+            </a>
+            {% if user.is_staff %}
+            <a href="/admin/" class="nav-item">
+                <i class="ti ti-shield"></i> Админ-панель
+            </a>
+            <a href="{% url 'my_reservations' %}" class="nav-item {% if request.resolver_match.url_name == 'my_reservations' %}active{% endif %}">
+                <i class="ti ti-heart-handshake"></i> Подарки друзьям
+            </a>
+            {% endif %}
+        </nav>
+
+        <a href="{% url 'logout' %}" class="nav-item nav-logout">
+            <i class="ti ti-logout"></i> Выйти
+        </a>
+    </aside>
+
+    <!-- Основной контент -->
+    <main class="main-content">
+        {% if messages %}
+            {% for msg in messages %}
+                <div class="alert alert-{{ msg.tags }}">{{ msg }}</div>
+            {% endfor %}
+        {% endif %}
+        {% block content %}{% endblock %}
+    </main>
+</div>
+
+{% else %}
+<!-- Неавторизованный пользователь -->
+{% block outside_content %}{% endblock %}
+{% endif %}
+
+</body>
+</html>

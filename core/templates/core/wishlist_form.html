@@ -1,0 +1,58 @@
+{% extends 'core/base.html' %}
+{% block title %}{% if action == 'create' %}Создать вишлист{% else %}Редактировать вишлист{% endif %} — WishList{% endblock %}
+
+{% block content %}
+<div class="form-page">
+    <div class="form-page-header">
+        <a href="{% url 'profile' %}" class="back-link">
+            <i class="ti ti-arrow-left"></i> Назад
+        </a>
+        <h1>{% if action == 'create' %}Создать вишлист{% else %}Редактировать вишлист{% endif %}</h1>
+    </div>
+
+    <form method="post" class="content-form">
+        {% csrf_token %}
+
+        <div class="field">
+            <label>{{ form.title.label }} <span class="req">*</span></label>
+            {{ form.title }}
+            {% if form.title.errors %}
+                <div class="field-error">{{ form.title.errors.0 }}</div>
+            {% endif %}
+        </div>
+
+        <div class="field">
+            <label>{{ form.comment.label }}</label>
+            {{ form.comment }}
+        </div>
+
+        <div class="field-row">
+            <div class="field">
+                <label>{{ form.event_type.label }}</label>
+                {{ form.event_type }}
+            </div>
+            <div class="field">
+                <label>{{ form.event_date.label }}</label>
+                {{ form.event_date }}
+                <div class="field-hint">Если вишлист для события — выбери дату</div>
+            </div>
+        </div>
+
+        <div class="field">
+            <label>{{ form.privacy.label }}</label>
+            {{ form.privacy }}
+            <div class="field-hint">
+                Публичный — виден всем в «Идеях подарков», без резервирования.<br>
+                Приватный — только по ссылке, друзья могут резервировать подарки.
+            </div>
+        </div>
+
+        <div class="form-footer">
+            <button type="submit" class="btn-main">
+                {% if action == 'create' %}Создать вишлист{% else %}Сохранить{% endif %}
+            </button>
+            <a href="{% url 'profile' %}" class="btn-outline-sm">Отмена</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

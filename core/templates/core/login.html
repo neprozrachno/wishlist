@@ -1,0 +1,114 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WishList — Вход</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+</head>
+<body class="auth-body">
+
+<div class="auth-card">
+    <div class="brand">wish<span>list</span></div>
+    <div class="card-sub">Войдите или создайте профиль</div>
+
+    <!-- Переключатель ролей -->
+    <div class="role-row">
+        <button class="role-btn {% if mode != 'register' and mode != 'guest' %}active{% endif %}"
+                data-mode="login">
+            <i class="ti ti-user"></i> Пользователь
+        </button>
+        <button class="role-btn {% if mode == 'register' %}active{% endif %}"
+                data-mode="register">
+            <i class="ti ti-user-plus"></i> Регистрация
+        </button>
+        <button class="role-btn {% if mode == 'guest' %}active{% endif %}"
+                data-mode="guest">
+            <i class="ti ti-eye"></i> Гость
+        </button>
+    </div>
+
+    {% if messages %}
+        {% for msg in messages %}
+            <div class="alert-inline">{{ msg }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Форма входа -->
+    <form method="post" id="form-login" class="auth-form {% if mode == 'register' or mode == 'guest' %}hidden{% endif %}">
+        {% csrf_token %}
+        <input type="hidden" name="mode" value="login">
+        <div class="field">
+            <label>Логин</label>
+            <input type="text" name="username" placeholder="neprozrachno" value="{{ form.username.value|default:'' }}">
+        </div>
+        <div class="field">
+            <label>Пароль</label>
+            <input type="password" name="password" placeholder="••••••••">
+        </div>
+        <button type="submit" class="btn-main">Войти</button>
+    </form>
+
+    <!-- Форма регистрации -->
+    <form method="post" id="form-register" class="auth-form {% if mode != 'register' %}hidden{% endif %}">
+        {% csrf_token %}
+        <input type="hidden" name="mode" value="register">
+        <div class="field">
+            <label>Логин</label>
+            <input type="text" name="username" placeholder="neprozrachno">
+            {% if register_form.username.errors %}
+                <div class="field-error">{{ register_form.username.errors.0 }}</div>
+            {% endif %}
+        </div>
+        <div class="field">
+            <label>E-mail</label>
+            <input type="email" name="email" placeholder="email@example.com">
+        </div>
+        <div class="field">
+            <label>Пароль</label>
+            <input type="password" name="password1" placeholder="Минимум 8 символов">
+        </div>
+        <div class="field">
+            <label>Повторите пароль</label>
+            <input type="password" name="password2" placeholder="••••••••">
+            {% if register_form.password2.errors %}
+                <div class="field-error">{{ register_form.password2.errors.0 }}</div>
+            {% endif %}
+        </div>
+        <button type="submit" class="btn-main">Создать аккаунт</button>
+    </form>
+
+    <!-- Гость -->
+    <div id="form-guest" class="auth-form {% if mode != 'guest' %}hidden{% endif %}">
+        <div class="guest-note">
+            <i class="ti ti-eye"></i>
+            Вы войдёте как гость — доступен только просмотр публичных вишлистов
+        </div>
+        <a href="{% url 'public_feed' %}" class="btn-main" style="display:block;text-align:center;text-decoration:none;">
+            Продолжить как гость
+        </a>
+    </div>
+</div>
+
+<script>
+const roleBtns = document.querySelectorAll('.role-btn');
+const forms = {
+    login:    document.getElementById('form-login'),
+    register: document.getElementById('form-register'),
+    guest:    document.getElementById('form-guest'),
+};
+
+roleBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+        roleBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const mode = btn.dataset.mode;
+        Object.values(forms).forEach(f => f.classList.add('hidden'));
+        forms[mode].classList.remove('hidden');
+    });
+});
+</script>
+</body>
+</html>

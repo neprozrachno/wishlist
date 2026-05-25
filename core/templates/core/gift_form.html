@@ -1,0 +1,90 @@
+{% extends 'core/base.html' %}
+{% block title %}{% if action == 'create' %}Добавить подарок{% else %}Редактировать подарок{% endif %} — WishList{% endblock %}
+
+{% block content %}
+<div class="form-page">
+    <div class="form-page-header">
+        <a href="{% url 'wishlist_detail' wishlist.pk %}" class="back-link">
+            <i class="ti ti-arrow-left"></i> Назад
+        </a>
+        <h1>{% if action == 'create' %}Добавить подарок{% else %}Редактировать подарок{% endif %}</h1>
+        <div class="form-page-sub">Вишлист: {{ wishlist.title }}</div>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" class="content-form">
+        {% csrf_token %}
+
+        <div class="field">
+            <label>{{ form.name.label }} <span class="req">*</span></label>
+            {{ form.name }}
+            {% if form.name.errors %}
+                <div class="field-error">{{ form.name.errors.0 }}</div>
+            {% endif %}
+        </div>
+
+        <div class="field-row">
+            <div class="field">
+                <label>{{ form.category.label }}</label>
+                {{ form.category }}
+            </div>
+            <div class="field">
+                <label>{{ form.price.label }}</label>
+                {{ form.price }}
+            </div>
+        </div>
+
+        <div class="field">
+            <label>{{ form.priority.label }}</label>
+            {{ form.priority }}
+        </div>
+
+        <div class="field">
+            <label>{{ form.link.label }}</label>
+            {{ form.link }}
+            <div class="field-hint">Ссылка на страницу товара (для Озона и Яндекс Маркета картинка подтянется автоматически)</div>
+        </div>
+
+        <!-- Картинка -->
+        <div class="image-upload-block">
+            <div class="field">
+                <label>Своя картинка (загрузить файл)</label>
+                {{ form.image }}
+                <div class="field-hint">Загрузи фото вручную</div>
+            </div>
+
+            <div class="field">
+                <label>Или ссылка на изображение</label>
+                {{ form.image_url }}
+                <div class="field-hint">
+                    Вставь прямую ссылку на картинку товара.
+                    На ВБ: нажми правой кнопкой на фото → «Копировать адрес изображения»
+                </div>
+            </div>
+
+            {% if gift.image %}
+                <div class="image-preview">
+                    <img src="{{ gift.image.url }}" alt="Текущее изображение">
+                    <div class="image-preview-label">Текущее изображение</div>
+                </div>
+            {% elif gift.image_url %}
+                <div class="image-preview">
+                    <img src="{{ gift.image_url }}" alt="Изображение с сайта">
+                    <div class="image-preview-label">Текущее изображение</div>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="field">
+            <label>{{ form.comment.label }}</label>
+            {{ form.comment }}
+        </div>
+
+        <div class="form-footer">
+            <button type="submit" class="btn-main">
+                {% if action == 'create' %}Добавить подарок{% else %}Сохранить{% endif %}
+            </button>
+            <a href="{% url 'wishlist_detail' wishlist.pk %}" class="btn-outline-sm">Отмена</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

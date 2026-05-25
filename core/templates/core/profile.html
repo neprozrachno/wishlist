@@ -1,0 +1,91 @@
+{% extends 'core/base.html' %}
+{% load wishlist_tags %}
+{% block title %}Мой профиль — WishList{% endblock %}
+
+{% block content %}
+<div class="profile-header">
+    <div class="profile-avatar">{{ user.username|first|upper }}</div>
+    <div class="profile-info">
+        <h1>{{ user.get_full_name|default:user.username }}</h1>
+        <div class="profile-meta">
+            <span><i class="ti ti-gift"></i> {{ wishlists.count }} вишлист{{ wishlists.count|pluralize:",,ов" }}</span>
+        </div>
+        <div class="profile-actions">
+            <a href="{% url 'wishlist_create' %}" class="btn-main-sm">
+                <i class="ti ti-plus"></i> Создать вишлист
+            </a>
+            <a href="{% url 'public_profile' user.username %}" class="btn-outline-sm">
+                <i class="ti ti-external-link"></i> Моя публичная страница
+            </a>
+        </div>
+    </div>
+</div>
+
+<h2 class="section-title">Мои вишлисты</h2>
+
+{% if wishlists %}
+    <div class="wishlists-grid">
+        {% for wl in wishlists %}
+        <div class="wl-card">
+            <div class="wl-card-top">
+                <div>
+                    <a href="{% url 'wishlist_detail' wl.pk %}" class="wl-title">{{ wl.title }}</a>
+                    <div class="wl-meta">
+                        {% if wl.event_date %}📅 {{ wl.event_date|date:"d.m.Y" }} · {% endif %}
+                        {{ wl.get_event_type_display }}
+                    </div>
+                </div>
+                <div class="wl-badges">
+                    <span class="badge {% if wl.privacy == 'public' %}badge-pub{% else %}badge-priv{% endif %}">
+                        {{ wl.get_privacy_display }}
+                    </span>
+                    <span class="badge badge-status-{{ wl.status }}">
+                        {{ wl.get_status_display }}
+                    </span>
+                </div>
+            </div>
+
+            <div class="wl-gifts-count">
+                <i class="ti ti-gift"></i> {{ wl.gifts.count }} подарков
+            </div>
+
+            {% if wl.event_date %}
+                {% with days=wl.event_date|days_until %}
+                    {% if days > 0 %}
+                        <div class="days-counter">📅 Через {{ days }} дн.</div>
+                    {% elif days == 0 %}
+                        <div class="days-counter days-today">🎉 Сегодня!</div>
+                    {% else %}
+                        <div class="days-counter days-past">✅ Прошло</div>
+                    {% endif %}
+                {% endwith %}
+            {% endif %}
+
+            <div class="wl-card-actions">
+                <a href="{% url 'wishlist_detail' wl.pk %}" class="btn-sm">
+                    <i class="ti ti-eye"></i> Открыть
+                </a>
+                <a href="{% url 'gift_create' wl.pk %}" class="btn-sm purple">
+                    <i class="ti ti-plus"></i> Подарок
+                </a>
+                <a href="{% url 'wishlist_edit' wl.pk %}" class="btn-sm">
+                    <i class="ti ti-edit"></i>
+                </a>
+                <a href="{% url 'wishlist_delete' wl.pk %}" class="btn-sm danger">
+                    <i class="ti ti-trash"></i>
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="empty-state">
+        <div class="empty-icon"><i class="ti ti-gift"></i></div>
+        <h3>Пока нет вишлистов</h3>
+        <p>Создайте первый и поделитесь с друзьями!</p>
+        <a href="{% url 'wishlist_create' %}" class="btn-main-sm" style="margin-top:16px;">
+            <i class="ti ti-plus"></i> Создать вишлист
+        </a>
+    </div>
+{% endif %}
+{% endblock %}

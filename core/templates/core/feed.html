@@ -1,0 +1,44 @@
+{% extends 'core/base.html' %}
+{% block title %}Идеи подарков — WishList{% endblock %}
+
+{% block content %}
+<h1 class="section-title">Идеи подарков 🔥</h1>
+<div class="wishlists-grid">
+    {% for wl in wishlists %}
+    <div class="wl-card">
+        <div class="wl-card-top">
+            <div>
+                <a href="{% url 'wishlist_detail' wl.pk %}" class="wl-title">{{ wl.title }}</a>
+                <div class="wl-meta">@{{ wl.owner.username }} · {{ wl.get_event_type_display }}</div>
+            </div>
+            <span class="badge badge-pub">Публичный</span>
+        </div>
+        <div class="wl-gifts-count">
+            <i class="ti ti-gift"></i> {{ wl.gifts.count }} подарков
+        </div>
+        <a href="{% url 'wishlist_detail' wl.pk %}" class="btn-sm" style="margin-top:10px;">
+            Посмотреть →
+        </a>
+    </div>
+    {% empty %}
+    <div class="empty-state">
+        <p>Пока нет публичных вишлистов.</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block outside_content %}
+<div style="padding:40px 20px;max-width:900px;margin:0 auto;">
+    <h1>Идеи подарков 🔥</h1>
+    <div class="wishlists-grid" style="margin-top:20px;">
+        {% for wl in wishlists %}
+        <div class="wl-card">
+            <a href="{% url 'wishlist_detail' wl.pk %}" class="wl-title">{{ wl.title }}</a>
+            <div class="wl-meta">@{{ wl.owner.username }}</div>
+        </div>
+        {% endfor %}
+    </div>
+    <p style="margin-top:24px;"><a href="{% url 'login' %}">Войти</a> чтобы создать свой вишлист</p>
+</div>
+{% endblock %}

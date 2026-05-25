@@ -1,0 +1,78 @@
+{% extends 'core/base.html' %}
+{% block title %}Подарки друзьям — WishList{% endblock %}
+ 
+{% block content %}
+<h1 class="section-title">🎁 Подарки друзьям</h1>
+<p style="font-size:15px;color:#888;margin-bottom:24px;margin-top:-10px;">
+    Здесь все подарки которые ты зарезервировала
+</p>
+ 
+{% if gifts %}
+<div class="reservations-list">
+    {% for gift in gifts %}
+    <div class="reservation-card">
+        {% if gift.image or gift.image_url %}
+        <div class="reservation-img-wrap">
+            {% if gift.image %}
+                <img src="{{ gift.image.url }}" alt="{{ gift.name }}" class="reservation-img">
+            {% elif gift.image_url %}
+                <img src="{{ gift.image_url }}" alt="{{ gift.name }}" class="reservation-img">
+            {% endif %}
+        </div>
+        {% endif %}
+ 
+        <div class="reservation-info">
+            <div class="reservation-top">
+                <div>
+                    <div class="reservation-gift-name">{{ gift.name }}</div>
+                    <div class="reservation-meta">
+                        <span class="priority-dot priority-{{ gift.priority }}"></span>
+                        {{ gift.get_priority_display }} приоритет ·
+                        {{ gift.get_category_display }}
+                    </div>
+                </div>
+                <div class="reservation-price">
+                    {% if gift.price %}{{ gift.price|floatformat:0 }} ₽{% else %}—{% endif %}
+                </div>
+            </div>
+ 
+            <div class="reservation-wishlist">
+                <i class="ti ti-list"></i>
+                Вишлист:
+                <a href="{% url 'wishlist_detail' gift.wishlist.pk %}" class="reservation-wl-link">
+                    {{ gift.wishlist.title }}
+                </a>
+                · @{{ gift.wishlist.owner.username }}
+                {% if gift.wishlist.event_date %}
+                    · 📅 {{ gift.wishlist.event_date|date:"d.m.Y" }}
+                {% endif %}
+            </div>
+ 
+            {% if gift.link %}
+            <a href="{{ gift.link }}" target="_blank" class="gift-link" style="margin-top:8px;display:inline-flex;">
+                <i class="ti ti-external-link"></i> Смотреть товар
+            </a>
+            {% endif %}
+ 
+            <div class="reservation-actions">
+                <span class="badge badge-status-reserved">Зарезервирован</span>
+                <a href="{% url 'gift_unreserve' gift.pk %}" class="btn-sm danger"
+                   onclick="return confirm('Отменить резервирование «{{ gift.name }}»?')">
+                    <i class="ti ti-x"></i> Отменить резервирование
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <div class="empty-icon"><i class="ti ti-heart-handshake"></i></div>
+    <h3>Пока нет зарезервированных подарков</h3>
+    <p>Открой вишлист друга и зарезервируй подарок — он появится здесь</p>
+    <a href="{% url 'public_feed' %}" class="btn-main-sm" style="margin-top:16px;">
+        <i class="ti ti-compass"></i> Идеи подарков
+    </a>
+</div>
+{% endif %}
+{% endblock %}

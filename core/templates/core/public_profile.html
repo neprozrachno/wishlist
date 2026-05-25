@@ -1,0 +1,49 @@
+{% extends 'core/base.html' %}
+{% block title %}{{ profile_user.username }} — WishList{% endblock %}
+
+{% block content %}
+<div class="profile-header">
+    <div class="profile-avatar">{{ profile_user.username|first|upper }}</div>
+    <div class="profile-info">
+        <h1>{{ profile_user.get_full_name|default:profile_user.username }}</h1>
+        <div class="profile-meta">
+            <span><i class="ti ti-at"></i> {{ profile_user.username }}</span>
+            <span><i class="ti ti-gift"></i> {{ wishlists.count }} вишлист{{ wishlists.count|pluralize:",,ов" }}</span>
+        </div>
+    </div>
+</div>
+
+<h2 class="section-title">Вишлисты</h2>
+
+{% if wishlists %}
+    <div class="wishlists-grid">
+        {% for wl in wishlists %}
+        <div class="wl-card">
+            <div class="wl-card-top">
+                <div>
+                    <a href="{% url 'wishlist_detail' wl.pk %}" class="wl-title">{{ wl.title }}</a>
+                    <div class="wl-meta">
+                        {% if wl.event_date %}📅 {{ wl.event_date|date:"d.m.Y" }} · {% endif %}
+                        {{ wl.get_event_type_display }}
+                    </div>
+                </div>
+                <span class="badge badge-pub">Публичный</span>
+            </div>
+            <div class="wl-gifts-count">
+                <i class="ti ti-gift"></i> {{ wl.gifts.count }} подарков
+            </div>
+            <div class="wl-card-actions">
+                <a href="{% url 'wishlist_detail' wl.pk %}" class="btn-sm">
+                    <i class="ti ti-eye"></i> Открыть
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="empty-state">
+        <div class="empty-icon"><i class="ti ti-gift"></i></div>
+        <h3>Публичных вишлистов пока нет</h3>
+    </div>
+{% endif %}
+{% endblock %}

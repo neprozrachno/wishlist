@@ -1,0 +1,119 @@
+{% extends 'core/base.html' %}
+{% block title %}{{ wishlist.title }} — WishList{% endblock %}
+
+{% block content %}
+<div class="form-page-header">
+    <a href="{% url 'profile' %}" class="back-link">
+        <i class="ti ti-arrow-left"></i> Назад
+    </a>
+    <div>
+        <h1>{{ wishlist.title }}</h1>
+        <div class="wl-meta">
+            {% if wishlist.event_date %}📅 {{ wishlist.event_date|date:"d.m.Y" }} · {% endif %}
+            {{ wishlist.get_event_type_display }} ·
+            <span class="badge {% if wishlist.privacy == 'public' %}badge-pub{% else %}badge-priv{% endif %}">
+                {{ wishlist.get_privacy_display }}
+            </span>
+        </div>
+    </div>
+    {% if is_owner %}
+    <div class="header-actions">
+        <a href="{% url 'gift_create' wishlist.pk %}" class="btn-main-sm">
+            <i class="ti ti-plus"></i> Добавить подарок
+        </a>
+        <a href="{% url 'wishlist_edit' wishlist.pk %}" class="btn-outline-sm">
+            <i class="ti ti-edit"></i> Редактировать
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+{% if wishlist.comment %}
+    <div class="wl-comment">{{ wishlist.comment }}</div>
+{% endif %}
+
+{% if gifts %}
+<div class="gifts-grid">
+    {% for gift in gifts %}
+    <div class="gift-card">
+
+        {% if gift.image or gift.image_url %}
+        <div class="gift-img-wrap">
+            {% if gift.image %}
+                <img src="{{ gift.image.url }}" alt="{{ gift.name }}" class="gift-img">
+            {% elif gift.image_url %}
+                <img src="{{ gift.image_url }}" alt="{{ gift.name }}" class="gift-img">
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <div class="gift-cat-badge">{{ gift.get_category_display }}</div>
+        <div class="gift-name">{{ gift.name }}</div>
+        <div class="gift-meta">
+            <span class="priority-dot priority-{{ gift.priority }}"></span>
+            {{ gift.get_priority_display }} приоритет
+        </div>
+        <div class="gift-bottom">
+            <div class="gift-price">
+                {% if gift.price %}{{ gift.price|floatformat:0 }} ₽{% else %}—{% endif %}
+            </div>
+            <span class="badge badge-status-{{ gift.status }}">{{ gift.get_status_display }}</span>
+        </div>
+        {% if gift.link %}
+            <a href="{{ gift.link }}" target="_blank" class="gift-link">
+                <i class="ti ti-external-link"></i> Смотреть товар
+            </a>
+        {% endif %}
+        {% if gift.comment %}
+            <div class="gift-comment">{{ gift.comment }}</div>
+        {% endif %}
+        {% if gift.reserve_comment and is_owner %}
+            <div class="reserve-comment">
+                💬 {{ gift.reserve_comment }}
+            </div>
+        {% endif %}
+        <div class="gift-actions">
+            {% if is_owner %}
+                <a href="{% url 'gift_edit' gift.pk %}" class="btn-sm"><i class="ti ti-edit"></i></a>
+                <a href="{% url 'gift_delete' gift.pk %}" class="btn-sm danger"><i class="ti ti-trash"></i></a>
+            {% endif %}
+            {% if gift.status == 'free' and not is_owner and user.is_authenticated and wishlist.privacy == 'private' %}
+                <form method="post" action="{% url 'gift_reserve' gift.pk %}" style="margin-top:10px;width:100%;">
+                    {% csrf_token %}
+                    <textarea name="reserve_comment" placeholder="Комментарий (необязательно)&#10;Например: возьму синий, не чёрный"
+                              style="width:100%;padding:8px 10px;border:1px solid #e0e0da;border-radius:8px;font-size:13px;font-family:inherit;resize:none;height:60px;outline:none;margin-bottom:6px;"></textarea>
+                    <button type="submit" class="btn-sm purple" style="width:100%;">
+                        <i class="ti ti-check"></i> Зарезервировать
+                    </button>
+                </form>
+            {% endif %}
+            {% if gift.status == 'reserved' and gift.reserved_by == user %}
+                <a href="{% url 'gift_unreserve' gift.pk %}" class="btn-sm danger">
+                    <i class="ti ti-x"></i> Отменить
+                </a>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <div class="empty-icon"><i class="ti ti-gift"></i></div>
+    <h3>Подарков пока нет</h3>
+    {% if is_owner %}
+        <p>Добавьте первый подарок в вишлист!</p>
+        <a href="{% url 'gift_create' wishlist.pk %}" class="btn-main-sm" style="margin-top:16px;">
+            <i class="ti ti-plus"></i> Добавить подарок
+        </a>
+    {% endif %}
+</div>
+{% endif %}
+
+{% if is_owner and wishlist.privacy == 'private' %}
+<div class="share-box">
+    <i class="ti ti-link"></i>
+    <span>Приватная ссылка:</span>
+    <code>{{ request.scheme }}://{{ request.get_host }}{% url 'wishlist_by_token' wishlist.share_token %}</code>
+</div>
+{% endif %}
+{% endblock %}
