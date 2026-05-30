@@ -1,0 +1,29 @@
+{% extends 'core/base.html' %}
+{% block title %}Уведомления — WishList{% endblock %}
+ 
+{% block content %}
+<h1 class="section-title">🔔 Уведомления</h1>
+<p style="font-size:15px;color:#888;margin-bottom:24px;margin-top:-10px;">
+    Здесь появляются уведомления о твоих вишлистах
+</p>
+ 
+{% if notifications %}
+<div class="notifications-list">
+    {% for n in notifications %}
+    <div class="notification-card {% if not n.is_read %}notification-unread{% endif %}">
+        <div class="notification-icon">🔔</div>
+        <div class="notification-body">
+            <div class="notification-message">{{ n.message }}</div>
+            <div class="notification-time">{{ n.created_at|date:"d.m.Y в H:i" }}</div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <div class="empty-icon"><i class="ti ti-bell"></i></div>
+    <h3>Пока нет уведомлений</h3>
+    <p>Когда кто-то зарезервирует подарок из твоего вишлиста — ты узнаешь первым</p>
+</div>
+{% endif %}
+{% endblock %}

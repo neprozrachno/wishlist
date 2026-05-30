@@ -49,15 +49,19 @@
 
         <div class="gift-cat-badge">{{ gift.get_category_display }}</div>
         <div class="gift-name">{{ gift.name }}</div>
+        {% if wishlist.privacy == 'private' or is_owner %}
         <div class="gift-meta">
             <span class="priority-dot priority-{{ gift.priority }}"></span>
             {{ gift.get_priority_display }} приоритет
         </div>
+        {% endif %}
         <div class="gift-bottom">
             <div class="gift-price">
                 {% if gift.price %}{{ gift.price|floatformat:0 }} ₽{% else %}—{% endif %}
             </div>
-            <span class="badge badge-status-{{ gift.status }}">{{ gift.get_status_display }}</span>
+            {% if wishlist.privacy == 'private' %}
+                <span class="badge badge-status-{{ gift.status }}">{{ gift.get_status_display }}</span>
+            {% endif %}
         </div>
         {% if gift.link %}
             <a href="{{ gift.link }}" target="_blank" class="gift-link">
@@ -76,6 +80,12 @@
             {% if is_owner %}
                 <a href="{% url 'gift_edit' gift.pk %}" class="btn-sm"><i class="ti ti-edit"></i></a>
                 <a href="{% url 'gift_delete' gift.pk %}" class="btn-sm danger"><i class="ti ti-trash"></i></a>
+            {% endif %}
+            {% if wishlist.privacy == 'public' and user.is_authenticated and not is_owner %}
+                <a href="{% url 'gift_favorite_toggle' gift.pk %}" class="btn-sm {% if gift in user_favorites %}btn-fav-active{% endif %}">
+                    <i class="ti ti-heart"></i>
+                    {% if gift in user_favorites %}В избранном{% else %}В избранное{% endif %}
+                </a>
             {% endif %}
             {% if gift.status == 'free' and not is_owner and user.is_authenticated and wishlist.privacy == 'private' %}
                 <form method="post" action="{% url 'gift_reserve' gift.pk %}" style="margin-top:10px;width:100%;">
@@ -113,7 +123,10 @@
 <div class="share-box">
     <i class="ti ti-link"></i>
     <span>Приватная ссылка:</span>
-    <code>{{ request.scheme }}://{{ request.get_host }}{% url 'wishlist_by_token' wishlist.share_token %}</code>
+    <code id="shareLink">{{ request.scheme }}://{{ request.get_host }}{% url 'wishlist_by_token' wishlist.share_token %}</code>
+    <button class="btn-sm" onclick="copyToClipboard(document.getElementById('shareLink').textContent, this)">
+        <i class="ti ti-copy"></i> Копировать
+    </button>
 </div>
 {% endif %}
 {% endblock %}

@@ -1,0 +1,75 @@
+{% extends 'core/base_guest.html' %}
+{% block title %}{{ wishlist.title }} — WishList{% endblock %}
+
+{% block content %}
+<div class="form-page-header">
+    <a href="{% url 'public_feed' %}" class="back-link">
+        <i class="ti ti-arrow-left"></i> Назад
+    </a>
+    <div>
+        <h1>{{ wishlist.title }}</h1>
+        <div class="wl-meta">
+            {% if wishlist.event_date %}📅 {{ wishlist.event_date|date:"d.m.Y" }} · {% endif %}
+            {{ wishlist.get_event_type_display }} ·
+            <span class="badge badge-pub">Публичный</span>
+        </div>
+    </div>
+</div>
+
+{% if wishlist.comment %}
+    <div class="wl-comment">{{ wishlist.comment }}</div>
+{% endif %}
+
+{% if gifts %}
+<div class="gifts-grid">
+    {% for gift in gifts %}
+    <div class="gift-card">
+
+        {% if gift.image or gift.image_url %}
+        <div class="gift-img-wrap">
+            {% if gift.image %}
+                <img src="{{ gift.image.url }}" alt="{{ gift.name }}" class="gift-img">
+            {% elif gift.image_url %}
+                <img src="{{ gift.image_url }}" alt="{{ gift.name }}" class="gift-img">
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <div class="gift-cat-badge">{{ gift.get_category_display }}</div>
+        <div class="gift-name">{{ gift.name }}</div>
+        <div class="gift-bottom">
+            <div class="gift-price">
+                {% if gift.price %}{{ gift.price|floatformat:0 }} ₽{% else %}—{% endif %}
+            </div>
+        </div>
+        {% if gift.link %}
+            <a href="{{ gift.link }}" target="_blank" class="gift-link">
+                <i class="ti ti-external-link"></i> Смотреть товар
+            </a>
+        {% endif %}
+
+        <!-- Призыв войти чтобы добавить в избранное -->
+        <div class="gift-actions" style="margin-top:10px;">
+            <a href="{% url 'login' %}" class="btn-sm">
+                <i class="ti ti-heart"></i> Войди чтобы сохранить
+            </a>
+        </div>
+
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <div class="empty-icon"><i class="ti ti-gift"></i></div>
+    <h3>Подарков пока нет</h3>
+</div>
+{% endif %}
+
+<!-- Призыв к регистрации -->
+<p style="margin-top:24px;font-size:14px;color:#888;text-align:center;">
+    <a href="{% url 'login' %}" style="color:#8b5cf6;">Войди</a> или
+    <a href="{% url 'login' %}?mode=register" style="color:#8b5cf6;">зарегистрируйся</a>
+    чтобы сохранять подарки в избранное
+</p>
+
+{% endblock %}

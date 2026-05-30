@@ -1,22 +1,22 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}WishList{% endblock %}</title>
-    <link rel="stylesheet" href="{% load static %}{% static 'css/style.css' %}">
-    {% load static %}
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 </head>
 <body>
-
+ 
 {% if user.is_authenticated %}
 <div class="app-layout">
-    <!-- Сайдбар -->
+ 
     <aside class="sidebar">
         <div class="brand">wish<span>list</span></div>
-
+ 
+        <!-- Информация о пользователе -->
         <div class="user-chip">
             <div class="ava">{{ user.username|first|upper }}</div>
             <div>
@@ -24,7 +24,8 @@
                 <div class="user-handle">@{{ user.username }}</div>
             </div>
         </div>
-
+ 
+        <!-- Навигация -->
         <nav class="sidebar-nav">
             <a href="{% url 'profile' %}" class="nav-item {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
                 <i class="ti ti-user"></i> Моя страница
@@ -32,26 +33,32 @@
             <a href="{% url 'public_feed' %}" class="nav-item {% if request.resolver_match.url_name == 'public_feed' %}active{% endif %}">
                 <i class="ti ti-compass"></i> Идеи подарков
             </a>
-            <a href="{% url 'wishlist_create' %}" class="nav-item {% if request.resolver_match.url_name == 'wishlist_create' %}active{% endif %}">
-                <i class="ti ti-gift"></i> Мои вишлисты
+            <a href="{% url 'my_reservations' %}" class="nav-item {% if request.resolver_match.url_name == 'my_reservations' %}active{% endif %}">
+                <i class="ti ti-heart-handshake"></i> Подарки друзьям
+            </a>
+            <a href="{% url 'favorites' %}" class="nav-item {% if request.resolver_match.url_name == 'favorites' %}active{% endif %}">
+                <i class="ti ti-heart"></i> Избранное
+            </a>
+            <a href="{% url 'notifications' %}" class="nav-item {% if request.resolver_match.url_name == 'notifications' %}active{% endif %}">
+                <i class="ti ti-bell"></i> Уведомления
+                {% if unread_notifications_count > 0 %}
+                    <span class="notif-badge">{{ unread_notifications_count }}</span>
+                {% endif %}
             </a>
             {% if user.is_staff %}
             <a href="/admin/" class="nav-item">
                 <i class="ti ti-shield"></i> Админ-панель
             </a>
-            <a href="{% url 'my_reservations' %}" class="nav-item {% if request.resolver_match.url_name == 'my_reservations' %}active{% endif %}">
-                <i class="ti ti-heart-handshake"></i> Подарки друзьям
-            </a>
             {% endif %}
         </nav>
-
+ 
         <a href="{% url 'logout' %}" class="nav-item nav-logout">
             <i class="ti ti-logout"></i> Выйти
         </a>
     </aside>
-
-    <!-- Основной контент -->
+ 
     <main class="main-content">
+        <!-- Флеш-сообщения -->
         {% if messages %}
             {% for msg in messages %}
                 <div class="alert alert-{{ msg.tags }}">{{ msg }}</div>
@@ -59,12 +66,49 @@
         {% endif %}
         {% block content %}{% endblock %}
     </main>
+ 
 </div>
-
+ 
 {% else %}
-<!-- Неавторизованный пользователь -->
-{% block outside_content %}{% endblock %}
+<!-- Неавторизованный пользователь — заглушка с предложением войти -->
+<div class="guest-layout">
+    <header class="guest-header">
+        <div class="brand">wish<span>list</span></div>
+        <div class="guest-header-actions">
+            <a href="{% url 'public_feed' %}" class="btn-outline-sm">Идеи подарков</a>
+            <a href="{% url 'login' %}" class="btn-main-sm">Войти</a>
+        </div>
+    </header>
+    <main class="guest-main">
+        <div class="empty-state">
+            <div class="empty-icon"><i class="ti ti-lock"></i></div>
+            <h3>Войдите, чтобы продолжить</h3>
+            <p>Создавай вишлисты, сохраняй избранное и делись с друзьями</p>
+            <div style="display:flex;gap:10px;justify-content:center;margin-top:20px;">
+                <a href="{% url 'login' %}" class="btn-main-sm">Войти</a>
+                <a href="{% url 'login' %}?mode=register" class="btn-outline-sm">Зарегистрироваться</a>
+            </div>
+        </div>
+    </main>
+</div>
 {% endif %}
 
+<!-- Утилита копирования в буфер обмена -->
+<script>
+function copyToClipboard(text, btn) {
+    navigator.clipboard.writeText(text).then(() => {
+        const original = btn.innerHTML;
+        btn.innerHTML = '<i class="ti ti-check"></i> Скопировано!';
+        btn.style.color = '#065f46';
+        btn.style.borderColor = '#065f46';
+        setTimeout(() => {
+            btn.innerHTML = original;
+            btn.style.color = '';
+            btn.style.borderColor = '';
+        }, 2000);
+    });
+}
+</script>
+ 
 </body>
 </html>

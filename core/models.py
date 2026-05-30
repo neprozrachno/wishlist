@@ -4,37 +4,43 @@ import secrets
 
 
 class Wishlist(models.Model):
+    """Вишлист пользователя — публичная подборка или приватный список для друзей"""
+
     EVENT_TYPES = [
-        ('birthday',    'День Рождения'),
-        ('newyear',     'Новый Год'),
-        ('wedding',     'Свадьба'),
-        ('holiday',     'Праздник'),
-        ('noreason',    'Без повода'),
+        ('birthday', 'День Рождения'),
+        ('newyear',  'Новый Год'),
+        ('wedding',  'Свадьба'),
+        ('holiday',  'Праздник'),
+        ('noreason', 'Без повода'),
     ]
     PRIVACY_CHOICES = [
         ('public',  'Публичный'),
         ('private', 'Приватный'),
     ]
     STATUS_CHOICES = [
-        ('active',    'Активный'),
-        ('finished',  'Завершён'),
-        ('archived',  'Архивный'),
+        ('active',   'Активный'),
+        ('finished', 'Завершён'),
+        ('archived', 'Архивный'),
     ]
 
-    owner      = models.ForeignKey(User, on_delete=models.CASCADE, related_name='wishlists')
-    title      = models.CharField('Название', max_length=200)
-    comment    = models.TextField('Комментарий', blank=True)
-    event_type = models.CharField('Тип события', max_length=20, choices=EVENT_TYPES, default='birthday')
-    event_date = models.DateField('Дата события', null=True, blank=True)
-    privacy    = models.CharField('Приватность', max_length=10, choices=PRIVACY_CHOICES, default='public')
-    status     = models.CharField('Статус', max_length=10, choices=STATUS_CHOICES, default='active')
+    owner       = models.ForeignKey(User, on_delete=models.CASCADE, related_name='wishlists')
+    title       = models.CharField('Название', max_length=200)
+    comment     = models.TextField('Комментарий', blank=True)
+    event_type  = models.CharField('Тип события', max_length=20, choices=EVENT_TYPES, default='birthday')
+    event_date  = models.DateField('Дата события', null=True, blank=True)
+    privacy     = models.CharField('Приватность', max_length=10, choices=PRIVACY_CHOICES, default='public')
+    status      = models.CharField('Статус', max_length=10, choices=STATUS_CHOICES, default='active')
     share_token = models.CharField(max_length=64, unique=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at  = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):
         if not self.share_token:
             self.share_token = secrets.token_urlsafe(32)
         super().save(*args, **kwargs)
+
+    def reserved_count(self):
+        """Возвращает количество зарезервированных подарков — для прогресс-бара"""
+        return self.gifts.filter(status='reserved').count()
 
     def __str__(self):
         return f'{self.title} ({self.owner.username})'
@@ -46,6 +52,8 @@ class Wishlist(models.Model):
 
 
 class Gift(models.Model):
+    """Подарок в вишлисте"""
+
     CATEGORY_CHOICES = [
         ('electronics', 'Электроника'),
         ('books',       'Книги'),
@@ -66,19 +74,19 @@ class Gift(models.Model):
         ('gifted',   'Подарен'),
     ]
 
-    wishlist    = models.ForeignKey(Wishlist, on_delete=models.CASCADE, related_name='gifts')
-    name        = models.CharField('Название', max_length=200)
-    category    = models.CharField('Категория', max_length=20, choices=CATEGORY_CHOICES, default='other')
-    price       = models.PositiveIntegerField('Цена (₽)', default=0)
-    priority    = models.CharField('Приоритет', max_length=10, choices=PRIORITY_CHOICES, default='medium')
-    link        = models.URLField('Ссылка', blank=True)
-    image = models.ImageField('Изображение', upload_to='gifts/', null=True, blank=True)
-    image_url = models.URLField('URL изображения', blank=True)
-    comment     = models.TextField('Комментарий', blank=True)
-    status      = models.CharField('Статус', max_length=10, choices=STATUS_CHOICES, default='free')
-    reserved_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='reserved_gifts')
+    wishlist        = models.ForeignKey(Wishlist, on_delete=models.CASCADE, related_name='gifts')
+    name            = models.CharField('Название', max_length=200)
+    category        = models.CharField('Категория', max_length=20, choices=CATEGORY_CHOICES, default='other')
+    price           = models.PositiveIntegerField('Цена (₽)', default=0)
+    priority        = models.CharField('Приоритет', max_length=10, choices=PRIORITY_CHOICES, default='medium')
+    link            = models.URLField('Ссылка', blank=True)
+    image           = models.ImageField('Изображение', upload_to='gifts/', null=True, blank=True)
+    image_url       = models.URLField('URL изображения', blank=True)
+    comment         = models.TextField('Комментарий', blank=True)
+    status          = models.CharField('Статус', max_length=10, choices=STATUS_CHOICES, default='free')
+    reserved_by     = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='reserved_gifts')
     reserve_comment = models.TextField('Комментарий дарителя', blank=True)
-    created_at  = models.DateTimeField(auto_now_add=True)
+    created_at      = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f'{self.name} → {self.wishlist.title}'
@@ -87,3 +95,37 @@ class Gift(models.Model):
         ordering = ['-priority', 'name']
         verbose_name = 'Подарок'
         verbose_name_plural = 'Подарки'
+
+
+class Notification(models.Model):
+    """Уведомление для владельца вишлиста — создаётся через паттерн Observer"""
+
+    recipient  = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    message    = models.TextField('Сообщение')
+    is_read    = models.BooleanField('Прочитано', default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.recipient.username}: {self.message[:50]}'
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Уведомление'
+        verbose_name_plural = 'Уведомления'
+
+
+class Favorite(models.Model):
+    """Избранный подарок пользователя из публичного вишлиста"""
+
+    user       = models.ForeignKey(User, on_delete=models.CASCADE, related_name='favorites')
+    gift       = models.ForeignKey(Gift, on_delete=models.CASCADE, related_name='favorited_by')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.user.username} → {self.gift.name}'
+
+    class Meta:
+        unique_together = ('user', 'gift')
+        ordering = ['-created_at']
+        verbose_name = 'Избранное'
+        verbose_name_plural = 'Избранное'

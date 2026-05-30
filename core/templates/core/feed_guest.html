@@ -1,10 +1,10 @@
-{% extends 'core/base.html' %}
+{% extends 'core/base_guest.html' %}
 {% block title %}Идеи подарков — WishList{% endblock %}
 
 {% block content %}
 <h1 class="section-title">Идеи подарков 🔥</h1>
 <p style="font-size:15px;color:#888;margin-bottom:24px;margin-top:-10px;">
-    Публичные подборки пользователей — вдохновляйся и сохраняй в избранное
+    Публичные подборки пользователей — вдохновляйся!
 </p>
 
 <div class="wishlists-grid">
@@ -28,9 +28,14 @@
     <div class="empty-state">
         <div class="empty-icon"><i class="ti ti-compass"></i></div>
         <h3>Пока нет публичных вишлистов</h3>
-        <p>Создай первый и вдохнови других!</p>
     </div>
     {% endfor %}
 </div>
 
+<!-- Призыв к регистрации -->
+<p style="margin-top:24px;font-size:14px;color:#888;text-align:center;">
+    <a href="{% url 'login' %}" style="color:#8b5cf6;">Войди</a> или
+    <a href="{% url 'login' %}?mode=register" style="color:#8b5cf6;">зарегистрируйся</a>
+    чтобы создать свой вишлист и сохранять подарки в избранное
+</p>
 {% endblock %}

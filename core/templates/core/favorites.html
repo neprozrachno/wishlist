@@ -1,0 +1,73 @@
+{% extends 'core/base.html' %}
+{% block title %}Избранное — WishList{% endblock %}
+ 
+{% block content %}
+<h1 class="section-title">❤️ Избранное</h1>
+<p style="font-size:15px;color:#888;margin-bottom:24px;margin-top:-10px;">
+    Подарки из публичных вишлистов, которые тебя вдохновили
+</p>
+ 
+{% if favorites %}
+<div class="gifts-grid">
+    {% for fav in favorites %}
+    <div class="gift-card">
+ 
+        {% comment %}Изображение подарка — своё или по ссылке{% endcomment %}
+        {% if fav.gift.image or fav.gift.image_url %}
+        <div class="gift-img-wrap">
+            {% if fav.gift.image %}
+                <img src="{{ fav.gift.image.url }}" alt="{{ fav.gift.name }}" class="gift-img">
+            {% elif fav.gift.image_url %}
+                <img src="{{ fav.gift.image_url }}" alt="{{ fav.gift.name }}" class="gift-img">
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% comment %}Основная информация о подарке{% endcomment %}
+        <div class="gift-cat-badge">{{ fav.gift.get_category_display }}</div>
+        <div class="gift-name">{{ fav.gift.name }}</div>
+        <div class="gift-bottom">
+            <div class="gift-price">
+                {% if fav.gift.price %}{{ fav.gift.price|floatformat:0 }} ₽{% else %}—{% endif %}
+            </div>
+        </div>
+
+        {% comment %}Ссылка на вишлист владельца{% endcomment %}
+        <div class="reservation-wishlist" style="margin-bottom:10px;">
+            <i class="ti ti-list"></i>
+            <a href="{% url 'wishlist_detail' fav.gift.wishlist.pk %}" class="reservation-wl-link">
+                {{ fav.gift.wishlist.title }}
+            </a>
+            · @{{ fav.gift.wishlist.owner.username }}
+        </div>
+
+        {% if fav.gift.link %}
+            <a href="{{ fav.gift.link }}" target="_blank" class="gift-link">
+                <i class="ti ti-external-link"></i> Смотреть товар
+            </a>
+        {% endif %}
+
+        {% comment %}Кнопка удаления из избранного{% endcomment %}
+        <div class="gift-actions" style="margin-top:10px;">
+            <a href="{% url 'gift_favorite_toggle' fav.gift.pk %}" class="btn-sm danger">
+                <i class="ti ti-heart-off"></i> Убрать из избранного
+            </a>
+        </div>
+
+    </div>
+    {% endfor %}
+</div>
+
+{% else %}
+{% comment %}Пустое состояние — нет избранных подарков{% endcomment %}
+<div class="empty-state">
+    <div class="empty-icon"><i class="ti ti-heart"></i></div>
+    <h3>Пока нет избранных подарков</h3>
+    <p>Открывай публичные вишлисты и сохраняй понравившиеся подарки</p>
+    <a href="{% url 'public_feed' %}" class="btn-main-sm" style="margin-top:16px;">
+        <i class="ti ti-compass"></i> Идеи подарков
+    </a>
+</div>
+{% endif %}
+
+{% endblock %}

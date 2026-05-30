@@ -14,9 +14,9 @@
             <a href="{% url 'wishlist_create' %}" class="btn-main-sm">
                 <i class="ti ti-plus"></i> Создать вишлист
             </a>
-            <a href="{% url 'public_profile' user.username %}" class="btn-outline-sm">
-                <i class="ti ti-external-link"></i> Моя публичная страница
-            </a>
+            <button class="btn-outline-sm" onclick="copyToClipboard('{{ request.scheme }}://{{ request.get_host }}/u/{{ user.username }}/', this)">
+                <i class="ti ti-share"></i> Поделиться профилем
+            </button>
         </div>
     </div>
 </div>
@@ -48,6 +48,16 @@
             <div class="wl-gifts-count">
                 <i class="ti ti-gift"></i> {{ wl.gifts.count }} подарков
             </div>
+            {% if wl.gifts.count > 0 %}
+            <div class="progress-wrap">
+                <div class="progress-label">
+                    {{ wl.reserved_count }} из {{ wl.gifts.count }} зарезервировано
+                </div>
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" style="width: {% widthratio wl.reserved_count wl.gifts.count 100 %}%"></div>
+                </div>
+            </div>
+            {% endif %}
 
             {% if wl.event_date %}
                 {% with days=wl.event_date|days_until %}
